@@ -140,9 +140,9 @@ def make_csv():
 	csvlist.append("時間帯({min}分毎)".format(min=TIME_MIN_DIV))
 	csvlist.append("リクエストURL")
 	csvlist.append("リクエスト回数")
-	csvlist.append("最大リクエスト時間(ms)	")
-	csvlist.append("合計リクエスト時間(ms)	")
-	csvlist.append("平均リクエスト時間(ms)	")
+	csvlist.append("最大レスポンス時間(ms)")
+	csvlist.append("合計レスポンス時間(ms)")
+	csvlist.append("平均レスポンス時間(ms)")
 	
 	# 出力
 	writer.writerow(csvlist)
