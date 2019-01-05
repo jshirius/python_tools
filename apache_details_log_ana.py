@@ -6,6 +6,11 @@ from datetime import datetime, date, time
 import csv
 import os
 
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 u"""
 MATCH_API_URLにmatchするApacheのアクセスログからリクエスト日時,リクエストURL,レスポン時間(ms)を取得する
 """
@@ -105,7 +110,28 @@ def make_csv():
 
 	# ファイルクローズ
 	f.close()	
+
+def make_pyplot():
 	
+	timeList = []
+	resTimeList = []
+	
+	for v in sorted(ana_datas, key=lambda x:x['time']):
+		timeList.append(v["time"])
+		resTimeList.append(v["res_time"])
+
+	
+	df = pd.DataFrame({
+	    'date': pd.to_datetime(timeList)
+        ,'res_time': resTimeList
+	})
+	
+	df = df.set_index('date')
+	plt.scatter(df.index, df['res_time'])
+
+	plt.xticks(rotation=10)
+	#plt.show()
+	plt.savefig("plot.png")
 
 def apache_log_main(path):
     read_count = 0
@@ -124,8 +150,6 @@ def apache_log_main(path):
 			#print read_count
 
 
-
-
 if __name__ == '__main__':
 
 	#解析対象のログのファイル名を取得する
@@ -141,12 +165,15 @@ if __name__ == '__main__':
 	for i in range(2,len(param)):
 		path = param[i]
 		if(os.path.exists(path) == True):		
-			print "現在処理中のファイル名:" + path
+			print ("現在処理中のファイル名:" + path)
 		else:
-			print "存在しないファイルです。ファイル名:" + path
+			print ("存在しないファイルです。ファイル名:" + path)
 			continue
 		apache_log_main(path)
 	
 	
 	#CSVに出力する
 	make_csv()
+	
+	#グラフを描画する
+	make_pyplot()
