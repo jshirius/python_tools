@@ -57,5 +57,52 @@ def reduce_mem_usage(df):
     print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
     
     return df
+
+
+
+#df(それぞれ1列とする)を２つわたし、差分のdfを作成する
+def df_word_counter_diff(df_1, df_1_column_name, output_df_1_column_name, df_2, df_2_column_name, output_df_2_column_name):
+
+    df_1_2 = pd.DataFrame()
+
+    #df_1側の処理をする
+    tweet_list = []
+    for data in tqdm(df_1[df_1_column_name]):
+        d = data.split()
+        tweet_list.extend(d)
+
+    a = Counter(tweet_list)
+    a = a.most_common()
+    a = dict(a)
+    keys = [k for k, v in a.items()]
+    values = [v for k, v in a.items()]
+    df_1_2['word_name'] = keys
+    df_1_2[output_df_1_column_name] = values
     
+
+    #df_2側の処理をする
+    tweet_list = []
+    for data in tqdm(df_2[df_2_column_name]):
+        d = data.split()
+        tweet_list.extend(d)
+
+    b = Counter(tweet_list)
+    b = b.most_common()
+    b = dict(b)
+    df_1_2[output_df_2_column_name]  = 0
+
+    for k, v in b.items():
+        data = df_1_2[ df_1_2.word_name == k ] 
+        
+        if(len(data) > 0):
+            #print(data)
+            df_1_2.loc[data.index , output_df_2_column_name] = v
+        else:
+            #行の追加
+            s = pd.Series([k, 0, v], index=df_1_2.columns, name='FOUR')
+            df_1_2 = df_1_2.append(s)
+
+    return df_1_2
+    #if( tweet_0_1_df[ tweet_0_1_df.word_name == k ]  == True):
+
     
