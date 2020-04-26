@@ -105,4 +105,28 @@ def df_word_counter_diff(df_1, df_1_column_name, output_df_1_column_name, df_2, 
     return df_1_2
     #if( tweet_0_1_df[ tweet_0_1_df.word_name == k ]  == True):
 
-    
+
+#状況をトラッキング
+def update_tracking(
+                    run_id, field, value, csv_file="./tracking.csv",
+                    integer=False, digits=None, nround=6,
+                    drop_broken_runs=False):
+    """
+        Tracking function for keep track of model parameters and
+        CV scores. `integer` forces the value to be an int.
+        """
+    try:
+        df = pd.read_csv(csv_file, index_col=[0])
+    except:
+        df = pd.DataFrame()
+    if drop_broken_runs:
+        df = df.dropna(subset=['1_f1'])
+    if integer:
+        value = round(value)
+    elif digits is not None:
+        value = round(value, digits)
+    df.loc[run_id, field] = value  # Model number is index
+    df = df.round(nround)
+    df.to_csv(csv_file)
+
+update_tracking(run_id, 'col_name', 'data')
