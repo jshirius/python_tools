@@ -153,8 +153,8 @@ def create_summary_data(summary_id, search_keyword, tweet_list):
     return summary_dict
 
 
-def create_tweet_area(search_keyword , tweet_df):
-    out_put = ".#%sの感想メインのツイート\n" % search_keyword
+def create_tweet_area(search_keyword ,adlink, tweet_df):
+    out_put = ".##%sの感想メインのツイート\n" % search_keyword
 
     out_put = out_put + "[html]\n"
     out_put = out_put + "<hr>\n"
@@ -165,13 +165,30 @@ def create_tweet_area(search_keyword , tweet_df):
 
         #ツイート本文
         data = link + "<br>\n\n" + "<p>" + row['rs_summary'] + "</p>"
+        if(len(adlink) > 0):
+            if (index % 17 == 0): #17個目ごとにアフィリエイトリンクを貼る
+                data = data + "<p>" + adlink + "</p>"
         data = data + "<hr>\n\n"
-
         out_put = out_put + data
+
+
+    #広告を入れる
+    if(len(adlink) > 0):
+        data = "<p>" + adlink + "</p>"
+        out_put = out_put + data
+
 
     out_put = out_put + "\n[/html]\n"
     return out_put
 
+twitter_collect_setting = ""
+
+def get_collect_setting(key:str):
+    print(twitter_collect_setting)
+    d = twitter_collect_setting[twitter_collect_setting['key'] ==key]
+    d = d.reset_index()
+    d = d.loc[0]['data']
+    return d
 
 if __name__ == '__main__':
 
@@ -180,7 +197,8 @@ if __name__ == '__main__':
     #summary_df = pd.DataFrame()
 
     #csvファイルから取得対象のキーワードを取得する
-    twitter_collect_list_df = pd.read_csv('twitter_collect_list.csv')
+    twitter_collect_list_df = pd.read_csv('twitter_collect_list_prod.csv')
+    twitter_collect_list_df = twitter_collect_list_df.fillna("")
 
     #キーリスト取得
     twitter_collect_setting = pd.read_csv('twitter_collect_setting.csv')
@@ -204,6 +222,7 @@ if __name__ == '__main__':
 
             #概要作成
             summary_data = create_summary_data(index + 1, row['keyword'], d)
+            summary_data['ad'] = row['ad']
             summary_list.append(summary_data)
 
     except Exception as e:
@@ -211,12 +230,12 @@ if __name__ == '__main__':
 
     #ここからテキストに書き出す
     print("・・・・・・・・・・・・・・・・")
-    #print(summary_list)
+    print(summary_list)
     #print(analysis_list)
 
     #pandasに入れる
     twitter_df = pd.DataFrame(analysis_list) 
-    summary_columns = ["summary_id", 'search_keyword','semantic_value','most_common' ,'tweet_cnt']
+    summary_columns = ["summary_id", 'search_keyword','semantic_value','most_common' ,'tweet_cnt','ad']
     summary_df = pd.DataFrame(summary_list, columns = summary_columns) 
     
 
@@ -233,33 +252,41 @@ if __name__ == '__main__':
     day = dt_now.strftime('%Y年%m月%d日')
 
     #リード文を作成する
-    d = twitter_collect_setting[twitter_collect_setting['key'] =="lead_sentence"]
-    d = d.loc[0]['data']
+    d = get_collect_setting('lead_sentence')
     d = d  % day
+    output_text = output_text + d + "\n\n"
 
 
+    #概要表示の情報
+    output_text = output_text + "#プログラミングスクールの集計結果" + "\n\n"
+
+    d = get_collect_setting('summary_cap')
     output_text = output_text + d + "\n\n"
 
     #概要tableを作成する
     pd.set_option("display.max_colwidth", 300)
     summary_df_html = summary_df.copy()
+    summary_df_html = summary_df_html.drop("ad", axis=1)
     summary_df_html = summary_df_html.rename(columns={'summary_id':'No' , 'search_keyword': 'プログラミングスクール名','semantic_value':'感情数値','most_common':'よく使われている言葉','tweet_cnt':'ツイート回数'})
 
     output_text = output_text + "[html]\n"
     output_text = output_text + summary_df_html.to_html(index_names=False, index= False, justify="left",show_dimensions= False)
     output_text = output_text + "\n[/html]\n\n"
 
-    #注意事項など作成
-    output_text = output_text + "注意点など\n\n"
+    #ツイート表示前
+    output_text = output_text + "#プログラミングスクールのツイートまとめ\n\n"
+
 
     #ツイートをひたすら出力するところ
     for index, row in  summary_df.iterrows():
         #
         twitter_df_temp = twitter_df [twitter_df['summary_id'] ==row['summary_id'] ]
-        data = create_tweet_area(row['search_keyword'] ,twitter_df_temp)
+        data = create_tweet_area(row['search_keyword'] , row['ad'],twitter_df_temp)
         output_text = output_text + data + "\n\n"
 
     #まとめ
+    d = get_collect_setting('end_cap')
+    output_text = output_text + d + "\n"
 
 
     output_text = output_text + "\n[/div]"
