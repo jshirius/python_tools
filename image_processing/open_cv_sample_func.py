@@ -1,5 +1,5 @@
 def get_hsv_report(rgb_image, plot_show = False, statistics_show=False):
-	"""hsv票色系の対応
+   """hsv票色系の対応
         Args:
             rgb_image(obj): rgbイメージ画像
             plot_show(bool): hsv票色系のグラフをプロットするか
@@ -7,8 +7,8 @@ def get_hsv_report(rgb_image, plot_show = False, statistics_show=False):
 
         Returns:
            hsv票色系のパーセントタイルの値
-	"""
-    hsv = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV) # hsv票色系に変換
+   """
+    hsv = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2HSV) # hsv票色系に変換
     h,s,v = cv2.split(hsv) # 各成分に分割
     
     def get_percentile_list(k, datas):
