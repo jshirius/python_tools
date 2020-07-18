@@ -28,11 +28,11 @@ def get_hsv_report(rgb_image, plot_show = False, statistics_show=False):
         return out_datas
     
     out_dict = {}
-    
-    plt.figure(figsize=(8, 5))
-    
+
+   
     #色相
     if(plot_show == True):
+        plt.figure(figsize=(8, 5))
         plt.hist(h.ravel(),256,[0,256], color="red", alpha=0.7, histtype="step", label="Hue")
     data = get_percentile_list("h_per",h.ravel())
     out_dict.update(data)
@@ -99,7 +99,7 @@ def get_rgb_report(rgb_image, plot_show = False, plot_title= "rgb",  statistics_
         Returns:
             rgb分布のパーセントタイルの値
     """
-    print(rgb_image.shape)
+    #print(rgb_image.shape)
     r,g,b = cv2.split(rgb_image) # 各成分に分割
 
     def get_percentile_list(k, datas):
@@ -174,7 +174,7 @@ def total_image_report(rgb_image):
 #data = get_hsv_report(img1,True)
 #print(data)
 
-img1 = cv2.imread('file_name.jpg')
-img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
-data = total_image_report(img1)
-print(data)
+#img1 = cv2.imread('file_name.jpg')
+#img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+#data = total_image_report(img1)
+#print(data)
